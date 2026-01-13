@@ -1,0 +1,257 @@
+﻿@using Emplaniapp.Abstracciones.ModelosParaUI
+@using Microsoft.AspNet.Identity
+@using System.Security.Claims
+@model Tuple<EmpleadoDto, List<RetencionDto>>
+
+@{
+    ViewBag.Title = $"{Model.Item1.nombre} {Model.Item1.primerApellido} {Model.Item1.segundoApellido}";
+    var seccionActiva = "Retenciones";
+}
+
+
+<!-- Título del empleado -->
+<div class="row">
+    <div class="col-md-12">
+        <a class="btn btn-light text-primary mb-2" href="@Url.Action( "listarHojaResumen", "HojaResumen")">
+            <i class="bi bi-arrow-left-short"></i>
+            Volver
+        </a>
+        <br />
+        <h2 class="titulo">@Model.Item1.nombre @Model.Item1.primerApellido @Model.Item1.segundoApellido</h2>
+        <br />
+    </div>
+</div>
+
+
+<!-- Enlaces de navegación -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="nav nav-tabs" role="tablist">
+            <a href="@Url.Action("DetallesRemu", "Remuneraciones", new { id = Model.Item1.idEmpleado })" class="@(seccionActiva == "Remuneraciones" ? "active" : "")  nav-item nav-link">Remuneraciones</a>
+            <a href="@Url.Action("Detalles", "Retenciones", new { id = Model.Item1.idEmpleado })" class="@(seccionActiva == "Retenciones" ? "active" : "")  nav-item nav-link">Retenciones</a>
+            <a href="@Url.Action("Detalles", "Liquidaciones", new { id = Model.Item1.idEmpleado })" class="@(seccionActiva == "Liquidacion" ? "active" : "")  nav-item nav-link">Liquidación</a>
+            <a href="@Url.Action("Detalles", "Observaciones", new { id = Model.Item1.idEmpleado, seccion = "Observaciones" })" class="@(seccionActiva == "Observaciones" ? "active" : "")  nav-item nav-link">Observaciones</a>
+        </div>
+        <br />
+    </div>
+</div>
+
+
+
+<!-- Contenido -->
+<div class="row">
+    <div class="col-md-12">
+
+        @if (seccionActiva == "Retenciones")
+        {
+            <div class="text-center mb-5">
+                <h2><strong>Retenciones</strong></h2>
+                <br />
+                <button id="btnAbrirCrearRetencion"
+                        class="btn btn-primary"
+                        data-emp="@Model.Item1.idEmpleado">
+                    <i class="bi bi-plus"></i> Agregar Retención
+                </button>
+            </div>
+
+            <div id="contenedorLista" class="row">
+                @if (Model.Item2.Any())
+                {
+                    foreach (var item in Model.Item2)
+                    {
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">@Html.DisplayFor(modelItem => item.nombreTipoRetencio)</h5>
+                                    <h6 class="card-subtitle text-muted">
+                                        @Html.DisplayFor(modelItem => item.fechaRetencio, "{0:yyyy-MM-dd}", new { @class = "form-control", @type = "date" })
+                                    </h6>
+                                    <hr />
+                                    <p><strong>Rebajo:</strong>  @item.rebajo.ToString("C2")</p>
+                                    <p>
+                                        <strong>Estado: </strong>
+                                        <span class="badge @(item.nombreEstado == "Activo" ? "badge-success" : "badge-secondary")">
+                                            @item.nombreEstado
+                                        </span>
+                                    </p>
+                                </div>
+                                <div class="card-footer bg-transparent border-top-0 d-flex justify-content-end">
+                                    <a href="javascript:;"
+                                       class="btn btn-light text-primary btn-editar-retencion"
+                                       data-id="@item.idRetencion">
+                                       <i class="bi bi-pencil-fill"></i>
+                                    </a>
+                                    <a href="javascript:;"
+                                       class=" btn btn-light btn-eliminar-retencion" style="color: #de6f6f;"
+                                       data-id="@item.idRetencion">
+                                        <i class="bi bi-trash3-fill"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            No hay retenciones registradas para este empleado.
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@* Modal Create *@
+<div class="modal fade" id="modalCrearRetencion" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" id="modal-body-retencion"></div>
+    </div>
+</div>
+
+@* Modal Edit *@
+<div class="modal fade" id="modalEditarRetencion" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" id="modal-body-editar"></div>
+    </div>
+</div>
+
+@* Modal Delete *@
+<div class="modal fade" id="modalEliminarRetencion" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" id="modal-body-eliminar"></div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script>
+    $(function() {
+        const empId   = @Model.Item1.idEmpleado;
+        const urlC    = '@Url.Action("Create","Retenciones")';
+        const urlE    = '@Url.Action("Edit","Retenciones")';
+        const urlD    = '@Url.Action("Delete","Retenciones")';
+        const urlList = '@Url.Action("Lista","Retenciones")';
+
+        // Inicializa cálculo en modales Create/Edit
+        function initRetModal(container) {
+            const $c    = $(container);
+            const $sal  = $c.find('#SalarioBase');
+            const $ddl  = $c.find('#ddlTipo');
+            const $pctH = $c.find('#txtPorcentaje');
+            const $pctD = $c.find('#pctDisplay');
+            const $mtoH = $c.find('#txtMonto');
+            const $mtoD = $c.find('#mtoDisplay');
+
+            function recalcular() {
+                let baseText = $sal.val().replace(/\./g,'').replace(',', '.');
+                let base = parseFloat(baseText) || 0;
+
+                let texto = $ddl.find('option:selected').text();
+                let m     = texto.match(/\((\d+([.,]\d+)?)%\)/);
+                let p     = m ? parseFloat(m[1].replace(',', '.')) : 0;
+
+                let pForm = p.toFixed(2).replace('.', ',');
+                $pctH.val(pForm);
+                $pctD.val(pForm);
+
+                let monto = base * p / 100;
+                let mForm = monto.toFixed(2).replace('.', ',');
+                $mtoH.val(mForm);
+                $mtoD.val(mForm);
+            }
+
+            $ddl.off('change').on('change', recalcular);
+            recalcular();
+        }
+
+        // ABRIR Create
+        $('#btnAbrirCrearRetencion').click(function() {
+            $('#modal-body-retencion')
+              .load(urlC + '?idEmpleado=' + empId, () => {
+                  $('#modalCrearRetencion').modal('show');
+                  initRetModal('#modal-body-retencion');
+              });
+        });
+
+        // ABRIR Edit
+        $(document).on('click', '.btn-editar-retencion', function() {
+            const id = $(this).data('id');
+            $('#modal-body-editar')
+              .load(urlE + '?id=' + id, () => {
+                  $('#modalEditarRetencion').modal('show');
+                  initRetModal('#modal-body-editar');
+              });
+        });
+
+        // ABRIR Delete
+        $(document).on('click', '.btn-eliminar-retencion', function() {
+            const id = $(this).data('id');
+            $('#modal-body-eliminar')
+              .load(urlD + '?id=' + id, () => {
+                  $('#modalEliminarRetencion').modal('show');
+              });
+        });
+
+        // AJAX Create
+        $(document).on('submit', '#formCrearRetencion', function(e) {
+            e.preventDefault();
+            const f = $(this);
+            $.post(f.attr('action'), f.serialize(), res => {
+                if (res.success) {
+                    $('#modalCrearRetencion').modal('hide');
+                    $('#contenedorLista').load(`${urlList}?idEmpleado=${empId}`);
+                } else {
+                    mostrarErrores(res.errors, f);
+                }
+            }, 'json');
+        });
+
+        // AJAX Edit
+        $(document).on('submit', '#formEditarRetencion', function(e) {
+            e.preventDefault();
+            const f = $(this);
+            $.post(f.attr('action'), f.serialize(), res => {
+                if (res.success) {
+                    $('#modalEditarRetencion').modal('hide');
+                    $('#contenedorLista').load(`${urlList}?idEmpleado=${empId}`);
+                } else {
+                    mostrarErrores(res.errors, f);
+                }
+            }, 'json');
+        });
+
+        // AJAX Delete
+        $(document).on('submit', '#formEliminarRetencion', function(e) {
+            e.preventDefault();
+            const f = $(this);
+            $.post(f.attr('action'), f.serialize(), res => {
+                if (res.success) {
+                    $('#modalEliminarRetencion').modal('hide');
+                    $('#contenedorLista').load(`${urlList}?idEmpleado=${empId}`);
+                }
+            }, 'json');
+        });
+
+        // CERRAR MODALES
+        $(document).on('click', '[data-dismiss="modal"]', function() {
+            $(this).closest('.modal').modal('hide');
+        });
+
+        // Mostrar errores
+        function mostrarErrores(errors, form) {
+            let html = '<div class="alert alert-danger validation-summary"><ul>';
+            errors.forEach(e => html += `<li>${e}</li>`);
+            html += '</ul></div>';
+            form.find('.validation-summary').remove();
+            form.prepend(html);
+        }
+    });
+
+    </script>
+}

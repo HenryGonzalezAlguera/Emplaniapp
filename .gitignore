@@ -1,0 +1,22 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build output
+**/bin/
+**/obj/
+
+# Logs
+*.log
+
+# Publish profiles (pueden llevar secretos)
+**/Properties/PublishProfiles/
+
+# Archivos de entorno (si existieran)
+**/appsettings.Development.json
+
+# NuGet packages folder (proyectos packages.config)
+packages/

@@ -1,0 +1,52 @@
+@model List<Emplaniapp.Abstracciones.ModelosParaUI.HistorialEmpleadoDto>
+
+@{
+    Layout = null;
+    var idEmpleado = ViewBag.IdEmpleado as int? ?? 0;
+    var totalEventos = ViewBag.TotalEventos as int? ?? 0;
+    var categorias = ViewBag.Categorias as List<string> ?? new List<string>();
+}
+
+<div class="text-center mb-2">
+    <h2><strong>Historial</strong></h2>
+    <br />
+</div>
+
+<div class="card card-block card-stretch">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3">
+                <h5>Informaci&oacute;n</h5>
+                <br />
+                <p class="text-secondary">Total Eventos: @totalEventos </p>
+                <p class="text-secondary">Categor&iacute;as: @(string.Join(", ", categorias ?? new List<string>()))</p>
+                @*<strong>ID Empleado:</strong> @idEmpleado<br>*@
+                @*<strong>Model Count:</strong> @(Model?.Count ?? 0)*@
+            </div>
+
+            <div class="col-md-9">
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var evento in Model.Take(5))
+                    {
+                        <div class="card card-block card-stretch basic-drop-shadow">
+                            <div class="card-body">
+                                <p><strong>@(evento.nombreEvento ?? "Sin nombre")</strong></p>
+                                <p>@(evento.descripcionEvento ?? "Sin descripción")</p>
+                                <p class="text-secondary small">Categor&iacute;a: @(evento.categoriaEvento ?? "Sin categoría")</p>
+                            </div>
+                        </div>
+                    }
+
+                }
+                else
+                {
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <p><emp>No hay eventos en el historial para este empleado.</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,140 @@
+@model Emplaniapp.UI.Models.DatosLaboralesViewModel
+
+@{
+    ViewBag.Title = "Editar Datos Laborales";
+}
+
+
+
+<a class="btn btn-light text-primary mb-2" href="@Url.Action("Detalles", "DatosPersonales", new { id = Model.IdEmpleado, seccion = "Datos personales" })">
+    <i class="bi bi-arrow-left-short"></i>
+    Volver
+</a>
+
+
+<!-- LAYOUT DE DOS COLUMNAS -->
+
+
+@using (Html.BeginForm("EditarDatosLaborales", "DatosPersonales", FormMethod.Post, new { @class = "form-horizontal", id = "editForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.IdEmpleado)
+
+    if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger row justify-content-between m-0 align-content-center" role="alert">
+            @Html.ValidationSummary(true, "Por favor, revise que todos los datos requeridos se encuentren completos", new { @class = "text-danger" })
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <i class="bi bi-x text-danger"></i>
+            </button>
+        </div>
+        <br />
+    }
+
+    <div class="card card-block card-stretch">
+
+        <div class="card-header">
+            <h3>Editar Datos Laborales</h3>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.NumeroOcupacion, htmlAttributes: new { @class = "control-label" })
+                        @Html.EditorFor(model => model.NumeroOcupacion, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.IdCargo, htmlAttributes: new { @class = "control-label" })
+                        @Html.DropDownListFor(model => model.IdCargo, (SelectList)ViewBag.Cargos, "Seleccione un cargo", new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.IdCargo, "", new { @class = "advertencia" })
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.FechaIngreso, htmlAttributes: new { @class = "control-label" })
+                        @Html.TextBoxFor(model => model.FechaIngreso, "{0:yyyy-MM-dd}", new { @id = "fechaLiq", @class = "form-control", @type = "date" })
+                        @*@Html.EditorFor(model => model.FechaIngreso, "{0:yyyy-MM-dd}", new { htmlAttributes = new { @class = "form-control", @type = "date" } })*@
+                        @Html.ValidationMessageFor(model => model.FechaIngreso, "", new { @class = "advertencia" })
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.FechaSalida, htmlAttributes: new { @class = "control-label" })
+                        @Html.EditorFor(model => model.FechaSalida, new { htmlAttributes = new { @class = "form-control", @type = "date" } })
+                        @Html.ValidationMessageFor(model => model.FechaSalida, "", new { @class = "advertencia" })
+
+                    </div>
+
+                </div>
+            </div>
+            <br />
+
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    @Html.ActionLink("Cancelar", "Detalles", new { id = Model.IdEmpleado }, new { @class = "btn btn-outline-secondary m-2" })
+                    <input type="submit" value="Guardar Cambios" class="btn btn-primary m-2" />
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+<!-- Renderiza el modal de confirmación -->
+@Html.Partial("_AdminPasswordModal")
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        $(document).ready(function () {
+            var mainForm = $('#editForm');
+
+            mainForm.on('submit', function (e) {
+                e.preventDefault();
+
+                // Usar función centralizada para mostrar el modal
+                if (window.AdminPasswordModal && window.AdminPasswordModal.show) {
+                    window.AdminPasswordModal.show();
+                } else {
+                    // Fallback si el modal centralizado no está disponible
+                    $('#adminPasswordInput').val('');
+                    $('#adminPasswordError').hide().text('');
+                    $('#adminPasswordModal').modal('show');
+                }
+            });
+
+            $('#confirmAdminPasswordBtn').on('click', function () {
+                var password = $('#adminPasswordInput').val();
+                var errorDiv = $('#adminPasswordError');
+                var token = mainForm.find('input[name="__RequestVerificationToken"]').val();
+
+                if (!password) {
+                    errorDiv.text('La contraseña no puede estar vacía.').show();
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("ValidateAdminPassword", "DatosPersonales")',
+                    method: 'POST',
+                    data: {
+                        __RequestVerificationToken: token,
+                        password: password
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            $('#adminPasswordModal').modal('hide');
+                            mainForm.off('submit').submit();
+                        } else {
+                            errorDiv.text(response.message).show();
+                        }
+                    },
+                    error: function () {
+                        errorDiv.text('Error de comunicación con el servidor.').show();
+                    }
+                });
+            });
+        });
+    </script>
+}

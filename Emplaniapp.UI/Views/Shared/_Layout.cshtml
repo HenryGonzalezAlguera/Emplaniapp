@@ -1,0 +1,351 @@
+﻿@using Microsoft.AspNet.Identity
+@using System.Security.Claims
+@using Emplaniapp.UI.Helpers
+
+@{
+    // Evitar ?. para compatibilidad con C# 5
+    var claimsIdentity = (User != null) ? User.Identity as ClaimsIdentity : null;
+
+    Claim idEmpleadoClaim = null;
+    if (claimsIdentity != null)
+    {
+        idEmpleadoClaim = claimsIdentity.FindFirst("idEmpleado");
+    }
+    var idEmpleado = (idEmpleadoClaim != null) ? idEmpleadoClaim.Value : null;
+
+    // Obtener todos los roles del usuario
+    var userRoles = RoleHelper.GetAllUserRoles();
+    var primaryRole = RoleHelper.GetPrimaryRole();
+    var hasMultipleRoles = RoleHelper.HasMultipleRoles();
+
+    // Funciones de verificación de roles (sistema unificado)
+    Func<string, bool> hasRole = role => RoleHelper.HasRole(role);
+    Func<string[], bool> hasAnyRole = roles => RoleHelper.HasAnyRole(roles);
+    Func<string, bool> doesNotHaveRole = role => RoleHelper.DoesNotHaveRole(role);
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Language" content="es" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Suplidora Royal Ltda.</title>
+    @*@Styles.Render("~/Content/css")*@
+    @Scripts.Render("~/bundles/modernizr")
+
+    <!-- CSS -->
+    <link href="~/Content/CSS/estilosApp.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+    <!-- Plantilla -->
+    <link href="~/Content/assets/css/backend-plugin.min.css" rel="stylesheet" />
+    <link href="~/Content/assets/css/backend.css" rel="stylesheet" />
+    @*<link href="~/Content/assets/fontawesome/all.min.css" rel="stylesheet" />
+    <link href="~/Content/assets/lineawesome/line-awesome.min.css" rel="stylesheet" />
+    <link href="~/Content/assets/remixicon/remixicon.css" rel="stylesheet" />
+    <link href="~/Content/assets/docviewer/pdf.viewer.css" rel="stylesheet" />*@
+
+</head>
+
+<body class="color-light">
+    <div class="wrapper">
+
+        <!-- Menú lateral -->
+        <div class="iq-sidebar  sidebar-default">
+
+            <!-- Cabecera de menú -->
+            <div class="iq-sidebar-logo d-flex align-items-center justify-content-between">
+                <a href="@Url.Action("Index", "Home")" class="header-logo">
+                    <div>
+                        <div style="padding-left:10px; font-size:16px; font-weight:normal;">SUPLIDORA</div>
+                        <div style="padding-left: 10px; font-size: 26px; font-weight: bold;">ROYAL LDTA.</div>
+                    </div>
+                </a>
+                <div class="align-content-center">
+                    <i class="bi bi-list wrapper-menu mt-auto"></i>
+                </div>
+            </div>
+            <hr />
+
+            <!-- Contenido de menú -->
+            <div class="data-scrollbar" data-scroll="1">
+
+                <nav class="iq-sidebar-menu">
+                    <ul id="iq-sidebar-toggle" class="iq-menu">
+
+                        @if (hasRole("Administrador"))
+                        {
+                            <!-- Menú para Administrador -->
+                            <li class="">
+                                <a href="@Url.Action("ListarEmpleados", "Empleado")">
+                                    <i class="bi bi-people-fill"></i>
+                                    <span>Empleados</span>
+                                </a>
+                            </li>
+                        }
+
+                        @if (hasRole("Administrador") || hasRole("Contador"))
+                        {
+                            <li class="">
+                                <a href="@Url.Action("Index", "variablesFinancieras")">
+                                    <i class="bi bi-currency-exchange"></i>
+                                    <span>Variables Financieras</span>
+                                </a>
+                            </li>
+                        }
+
+                        @if (hasRole("Contador"))
+                        {
+                            <!-- Menú para Contador -->
+                            <li class="">
+                                <a href="@Url.Action("listarHojaResumen", "HojaResumen")">
+                                    <i class="bi bi-file-earmark-ruled-fill"></i>
+                                    <span>Hoja Resumen</span>
+                                </a>
+                            </li>
+                            <li class="">
+                                <a href="@Url.Action("Index", "TableroDeControl")">
+                                    <i class="bi bi-bar-chart-fill"></i>
+                                    <span>Tablero de Control</span>
+                                </a>
+                            </li>
+                        }
+
+                        @if (hasRole("Empleado"))
+                        {
+                        //Menú para Empleado
+
+                        <li class="nav-item nav-icon">
+                            <a href="@Url.Action("Detalles", "DatosPersonales")">
+                                <i class="bi bi-person-fill"></i>
+                                <span>Mi Perfil</span>
+                            </a>
+                        </li>
+
+                        @*<li class="nav-item nav-icon">
+                            <a href="@Url.Action("HistorialPagos", "ReportesPago")">
+                                <i class="bi bi-file-earmark-check-fill"></i>
+                                <span>Reporte de Pagos</span>
+                            </a>
+                        </li>*@
+                        }
+
+
+
+                    </ul>
+                </nav>
+                <div class="sidebar-bottom">
+                </div>
+                <div class="p-3"></div>
+            </div>
+
+
+
+        </div>
+
+
+        <!-- Barra superior -->
+
+        <div class="iq-top-navbar">
+            <div class="iq-navbar-custom">
+                
+                <nav class="navbar navbar-expand-lg navbar-light p-0">
+
+                    <div class="iq-navbar-logo d-flex align-items-center justify-content-between">
+                        <svg class="ri-menu-line wrapper-menu bi bi-list" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5" />
+                        </svg>
+                        <a href="@Url.Action("Index", "Home")" class="header-logo">
+                            <div>
+                                <div style="padding-left:10px; font-size:16px; font-weight:bold;">SUPLIDORA ROYAL LDTA.</div>
+                                <div style="padding-left:10px; font-size:10px; font-weight:normal;">PORTAL DE EMPLANIAPP</div>
+                            </div>
+
+                        </a>
+                    </div>
+                    
+                    <!--Barra de búsqueda (espacio)-->
+                    <div></div>
+
+
+                    <div class="d-flex align-items-center">
+                        
+                           
+                        <ul class="navbar-nav ml-auto navbar-list align-items-center">
+
+                            @if (Request.IsAuthenticated)
+                            {
+                                <li class="nav-item nav-icon">
+                                    <a class="" id="dropdownMenuButton02" aria-haspopup="false" aria-expanded="false">
+                                        <div style="padding-left:10px; font-size:16px;" class="text-secondary">
+                                            @User.Identity.GetUserName()
+                                            @*<i class="bi bi-chevron-down"></i>*@
+                                        </div>
+                                    </a>
+
+                                </li>
+
+
+                                <li class="nav-item nav-icon" id="dropdownMenuButton03">
+                                    @using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutFormLayout" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-link nav-link" title="Cerrar sesión" id="logoutButton">
+                                            <i class="bi bi-door-open-fill" style="width:auto; height:auto;"></i>
+                                        </button>
+                                    }
+                                </li>
+                            }
+                            else
+                            {
+                                <!-- Si NO está autenticado, mostrar enlaces a Login-->
+                                <li class="nav-item nav-icon">
+
+                                    @Html.ActionLink("Iniciar sesión", "Login", "Account", new { area = "" }, new { @class = "btn btn-outline-primary" })
+                                </li>
+                            }
+
+                        </ul>
+                       
+                    </div>
+                </nav>
+            </div>
+        </div>
+
+
+        <!-- Contenido de la página -->
+
+        <div class="content-page bg-light">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <!-- Token anti-falsificación para AJAX -->
+                        @Html.AntiForgeryToken()
+                        <br />
+                        
+                        <!-- ✨ MEJORA: Mostrar mensajes informativos -->
+                        @Html.Partial("_MessageAlert")
+                        
+                        @RenderBody()
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+    <br />
+    <footer class="iq-footer">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-6">
+                    <p>&copy; @DateTime.Now.Year - Suplidora Royal Ltda. Todos los derechos reservados.</p>
+
+                </div>
+            </div>
+        </div>
+    </footer>
+
+
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+
+    <!-- Script para manejar logout -->
+    <script>
+        $(document).ready(function() {
+            // Manejar clic del botón de logout
+            $('#logoutButton').on('click', function(e) {
+                e.preventDefault();
+                $('#logoutConfirmModal').modal('show');
+                return false;
+            });
+            
+            // ✨ NUEVO: Manejar cancelación del logout
+            $('#cancelLogoutBtn').on('click', function() {
+                $('#logoutConfirmModal').modal('hide');
+            });
+            
+            // ✨ NUEVO: Manejar confirmación del logout
+            $('#confirmLogoutBtn').on('click', function() {
+                
+                // Deshabilitar botón para evitar doble envío
+                var btnConfirm = $(this);
+                btnConfirm.prop('disabled', true).html('<i class="bi bi-hourglass-split me-2"></i> Cerrando sesión...');
+                
+                // Mostrar mensaje de progreso
+                var originalTitle = $('#logoutConfirmModalLabel').text();
+                $('#logoutConfirmModalLabel').html('<i class="bi bi-hourglass-split me-2"></i> Cerrando Sesión...');
+                
+                // Cerrar modal después de un breve delay
+                setTimeout(function() {
+                    $('#logoutConfirmModal').modal('hide');
+                    
+                    // Restaurar título original
+                    setTimeout(function() {
+                        $('#logoutConfirmModalLabel').html(originalTitle);
+                        btnConfirm.prop('disabled', false).html('<i class="bi bi-door-open-fill me-2"></i> Cerrar Sesión');
+                    }, 500);
+                    
+                    // Enviar formulario
+                    $('#logoutFormLayout').submit();
+                }, 1000);
+            });
+            
+            // ✨ NUEVO: Manejar envío del formulario de logout
+            $('#logoutFormLayout').on('submit', function(e) {
+                return true;
+            });
+            
+            // ✨ NUEVO: Restaurar estado del modal cuando se cierre
+            $('#logoutConfirmModal').on('hidden.bs.modal', function () {
+                // Restaurar título original
+                $('#logoutConfirmModalLabel').html('<i class="bi bi-exclamation-triangle-fill me-2"></i> Confirmar Cierre de Sesión');
+                
+                // Restaurar botón de confirmación
+                $('#confirmLogoutBtn').prop('disabled', false).html('<i class="bi bi-door-open-fill me-2"></i> Cerrar Sesión');
+            });
+        });
+    </script>
+
+    <!-- Scripts de plantilla -->
+    <script src="~/Content/assets/js/backend-bundle.min.js"></script>  <!-- Backend Bundle JavaScript -->
+    <script src="~/Content/assets/js/pdf.js"></script> <!--PDF-->
+    <script src="~/Content/assets/js/app.js"></script> <!-- app JavaScript -->
+
+
+    <!-- Modal de Confirmación de Logout -->
+    <div class="modal fade" id="logoutConfirmModal" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="logoutConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="logoutConfirmModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Confirmar Cierre de Sesión
+                    </h5>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-door-open-fill text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    <h6 class="mb-3">¿Está seguro que desea cerrar sesión?</h6>
+                    <p class="text-muted mb-0">
+                        Será redirigido a la página de inicio de sesión.
+                    </p>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-outline-secondary" id="cancelLogoutBtn">
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="confirmLogoutBtn">
+                        Cerrar Sesión
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

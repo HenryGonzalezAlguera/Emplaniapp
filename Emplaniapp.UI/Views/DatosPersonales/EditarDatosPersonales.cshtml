@@ -1,0 +1,284 @@
+@model Emplaniapp.Abstracciones.ModelosParaUI.EmpleadoDto
+
+@{
+    ViewBag.Title = "Editar Datos Personales";
+}
+
+<a class="btn btn-light text-primary mb-2" href="@Url.Action("Detalles", "DatosPersonales", new { id = Model.idEmpleado, seccion = "Datos personales" })">
+    <i class="bi bi-arrow-left-short"></i>
+    Volver
+</a>
+
+
+@using (Html.BeginForm("ActualizarDatosPersonales", "DatosPersonales", FormMethod.Post, new { id = "editForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.idEmpleado)
+
+    @* Campos laborales ocultos - no se editan aquí pero son requeridos para validación *@
+    @Html.HiddenFor(model => model.idCargo)
+    @Html.HiddenFor(model => model.fechaContratacion)
+    @Html.HiddenFor(model => model.fechaSalida)
+
+    @* Campos financieros ocultos - no se editan aquí pero son requeridos para validación *@
+    @Html.HiddenFor(model => model.periocidadPago)
+    @Html.HiddenFor(model => model.idMoneda)
+    @Html.HiddenFor(model => model.cuentaIBAN)
+    @Html.HiddenFor(model => model.idBanco)
+    @Html.HiddenFor(model => model.salarioAprobado)
+    @Html.HiddenFor(model => model.salarioDiario)
+
+    if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger row justify-content-between m-0 align-content-center" role="alert">
+            @Html.ValidationSummary(true, "Por favor, revise que todos los datos requeridos se encuentren completos", new { @class = "text-danger" })
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <i class="bi bi-x text-danger"></i>
+            </button>
+        </div>
+        <br />
+    }
+
+
+    <!-- LAYOUT DE DOS COLUMNAS -->
+    <div class="card card-block card-stretch">
+        <div class="card-header">
+            <h3>Editar Informaci&oacute;n Personal</h3>
+        </div>
+        <div class="card-body">
+
+            <div class="row">
+
+                <!-- COLUMNA IZQUIERDA: DATOS PERSONALES -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.nombre, htmlAttributes: new { @class = "control-label" })
+                        @Html.EditorFor(model => model.nombre, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.nombre, "", new { @class = "advertencia" })
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.segundoNombre, htmlAttributes: new { @class = "control-label" })
+                        @Html.EditorFor(model => model.segundoNombre, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.segundoNombre, "", new { @class = "advertencia" })
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.primerApellido, htmlAttributes: new { @class = "control-label" })
+                        @Html.EditorFor(model => model.primerApellido, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.primerApellido, "", new { @class = "advertencia" })
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.segundoApellido, htmlAttributes: new { @class = "control-label" })
+                        @Html.EditorFor(model => model.segundoApellido, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.segundoApellido, "", new { @class = "advertencia" })
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.fechaNacimiento, htmlAttributes: new { @class = "control-label" })
+                        @Html.TextBoxFor(model => model.fechaNacimiento, "{0:yyyy-MM-dd}", new { @class = "form-control", @type = "date" })
+                        @Html.ValidationMessageFor(model => model.fechaNacimiento, "", new { @class = "advertencia" })
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.cedula, htmlAttributes: new { @class = "control-label" })
+                        @Html.EditorFor(model => model.cedula, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.cedula, "", new { @class = "advertencia" })
+                    </div>
+
+
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.numeroTelefonico, htmlAttributes: new { @class = "control-label" })
+                        @Html.EditorFor(model => model.numeroTelefonico, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.numeroTelefonico, "", new { @class = "advertencia" })
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.correoInstitucional, htmlAttributes: new { @class = "control-label" })
+                        @Html.EditorFor(model => model.correoInstitucional, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.correoInstitucional, "", new { @class = "advertencia" })
+                    </div>
+                    <div class=" row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.idProvincia, htmlAttributes: new { @class = "control-label" })
+                                @Html.DropDownListFor(
+                                              m => m.idProvincia,
+                                              ViewBag.Provincias as IEnumerable<SelectListItem>,
+                                              "-- Seleccione una provincia --",
+                                              new { @class = "form-control", @id = "ddlProvincia" })
+                                @Html.ValidationMessageFor(model => model.idProvincia, "", new { @class = "advertencia" })
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.nombreCanton, htmlAttributes: new { @class = "control-label" })
+                                @Html.EditorFor(model => model.nombreCanton, new { htmlAttributes = new { @class = "form-control", placeholder = "Ej: San Pedro, Carmen..." } })
+                                @Html.ValidationMessageFor(model => model.nombreCanton, "", new { @class = "advertencia" })
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                @Html.LabelFor(model => model.nombreDistrito, htmlAttributes: new { @class = "control-label" })
+                                @Html.EditorFor(model => model.nombreDistrito, new { htmlAttributes = new { @class = "form-control", placeholder = "Ej: Carmen, Centro, La Uruca..." } })
+                                @Html.ValidationMessageFor(model => model.nombreDistrito, "", new { @class = "advertencia" })
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.direccionDetallada, htmlAttributes: new { @class = "control-label" })
+                        @Html.TextAreaFor(model => model.direccionDetallada, new { @class = "form-control", rows = "3", placeholder = "Ingrese detalles" })
+                        @Html.ValidationMessageFor(model => model.direccionDetallada, "", new { @class = "advertencia" })
+                    </div>
+
+                    <!-- VISTA PREVIA DE DIRECCIÓN COMPLETA -->
+                    <div class="bg-warning-light p-3" style="margin-top: 15px;">
+                        <strong>Vista Previa:</strong>
+                        <div id="preview-direccion">
+                            <em>Seleccione la ubicaci&oacute;n para ver la direcci&oacute;n completa</em>
+                        </div>
+                    </div>
+
+                </div>
+
+
+            </div>
+            <br />
+            <br />
+            <!-- BOTONES DE ACCIÓN CENTRADOS -->
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    @Html.ActionLink("Cancelar", "Detalles", new { id = Model.idEmpleado }, new { @class = "btn btn-outline-secondary m-2" })
+                    <input type="submit" value="Guardar Cambios" class="btn btn-primary m-2" />
+                </div>
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+}
+
+<!-- Renderiza el modal de confirmación -->
+@Html.Partial("_AdminPasswordModal")
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        $(document).ready(function () {
+            var mainForm = $('#editForm');
+
+            // ==============================================
+            // Actualizar vista previa al cargar
+            actualizarVistaPrevia();
+
+            // EVENTOS PARA ACTUALIZAR VISTA PREVIA
+            $('#ddlProvincia, input[name="nombreCanton"], input[name="nombreDistrito"], #direccionDetallada').on('change input', function () {
+                actualizarVistaPrevia();
+            });
+
+
+
+
+
+
+
+            // FUNCIÓN PARA ACTUALIZAR VISTA PREVIA
+            function actualizarVistaPrevia() {
+                var provincia = $('#ddlProvincia option:selected').text();
+                var canton = $('input[name="nombreCanton"]').val().trim();
+                var distrito = $('input[name="nombreDistrito"]').val().trim();
+                var detallada = $('#direccionDetallada').val().trim();
+
+                var partes = [];
+
+                if (provincia && provincia !== '-- Seleccione provincia --') partes.push(provincia);
+                if (canton) partes.push(canton);
+                if (distrito) partes.push(distrito);
+
+                var direccionCompleta = partes.join(', ');
+                if (detallada) {
+                    direccionCompleta += '. ' + detallada;
+                }
+
+                var preview = $('#preview-direccion');
+                if (direccionCompleta) {
+                    preview.html('<strong>' + direccionCompleta + '</strong>');
+                } else {
+                    preview.html('<em>Complete la ubicaci&oacute;n para ver la direcci&oacute;n completa</em>');
+                }
+            }
+
+            // ==============================================
+            // LÓGICA PARA MODAL DE CONTRASEÑA ADMIN
+            // ==============================================
+
+            mainForm.on('submit', function (e) {
+                console.log('Formulario interceptado, mostrando modal de contraseña...');
+                // Prevenir el envío automático del formulario
+                e.preventDefault();
+
+                // Usar función centralizada para mostrar el modal
+                if (window.AdminPasswordModal && window.AdminPasswordModal.show) {
+                    window.AdminPasswordModal.show();
+                } else {
+                    // Fallback si el modal centralizado no está disponible
+                    $('#adminPasswordInput').val('');
+                    $('#adminPasswordError').hide().text('');
+                    $('#adminPasswordModal').modal('show');
+                }
+            });
+
+            $('#confirmAdminPasswordBtn').on('click', function () {
+                var password = $('#adminPasswordInput').val();
+                var errorDiv = $('#adminPasswordError');
+                // Obtener el token del formulario principal
+                var token = mainForm.find('input[name="__RequestVerificationToken"]').val();
+
+                if (!password) {
+                    errorDiv.text('La contraseña no puede estar vacía.').show();
+                    return;
+                }
+
+                // Llamada AJAX para validar la contraseña
+                console.log('Validando contraseña del administrador...');
+                $.ajax({
+                    url: '@Url.Action("ValidateAdminPassword", "DatosPersonales")',
+                    method: 'POST',
+                    data: {
+                        __RequestVerificationToken: token,
+                        password: password
+                    },
+                    success: function (response) {
+                        console.log('Respuesta del servidor:', response);
+                        if (response.success) {
+                            console.log('Contraseña correcta, enviando formulario...');
+                            // Si la contraseña es correcta, oculta el modal y envía el formulario principal
+                            $('#adminPasswordModal').modal('hide');
+                            mainForm.off('submit').submit(); // Desactiva el interceptor y envía
+                        } else {
+                            console.log('Contraseña incorrecta:', response.message);
+                            // Si es incorrecta, muestra el error
+                            errorDiv.text(response.message).show();
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.log('Error en AJAX:', status, error);
+                        // Error de comunicación
+                        errorDiv.text('Error de comunicación con el servidor.').show();
+                    }
+                });
+            });
+
+
+        });
+    </script>
+} 

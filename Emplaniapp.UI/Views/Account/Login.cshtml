@@ -1,0 +1,150 @@
+﻿@model Emplaniapp.UI.Models.LoginViewModel
+@{
+    ViewBag.Title = "Iniciar sesión";
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+}
+
+
+<div class="sign-user_card bg-white">
+
+    <!-- Header de la empresa -->
+    <div>
+        @*<img src="https://medismart.net/wp-content/uploads/2023/06/suplidora-royal.jpg" alt="Logo">*@
+        <img src="~/Content/Images/Emplaniapp_Logo1.png" alt="logo">
+    </div>
+
+    <br /><br />
+    <h3>Iniciar Sesión</h3>
+    
+    <!-- ✨ MEJORA: Área para mostrar mensajes de error específicos -->
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="error-message-container">
+            <div class="error-icon">⚠️</div>
+            <div class="error-text">
+                @Html.ValidationSummary(true, "", new { @class = "mb-0" })
+            </div>
+        </div>
+    }
+
+    <!-- Formulario de login -->
+    <div class="form-input">
+        @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { role = "form", id = "loginForm" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="row mb-2">
+                <div class="col-lg-12">
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.UserName, "Usuario", new { @class = "form-label text-secondary" })
+                        @Html.TextBoxFor(m => m.UserName, new
+                        {
+                            @class = "form-control",
+                            @type = "text",
+                            @style = "text-align: center;",
+                            @placeholder = "",
+                            @autocomplete = "username"
+                        })
+                        @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "advertencia" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-lg-12">
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.Password, "Contraseña", new { @class = "form-label text-secondary" })
+                        @Html.PasswordFor(m => m.Password, new
+                        {
+                            @class = "floating-input form-control",
+                            @type = "password",
+                            @style = "text-align: center;",
+                            @placeholder = "",
+                            @autocomplete = "current-password"
+                        })
+                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "advertencia" })
+                    </div>
+                </div>
+            </div> 
+
+            <button type="submit" class="btn btn-primary" id="loginBtn">
+                Iniciar Sesión
+            </button>
+        
+            <div class="mt-4 justify-content-center" style="text-size-adjust:auto;">
+                <p class="text-secondary">¿Olvidó su contraseña? 
+                    @Html.ActionLink("Ingrese aquí", "ForgotPassword", "Account",null , new {@class = "text-primary" })
+                </p>
+            </div>
+
+        }
+
+
+    </div>
+
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        $(document).ready(function () {
+            // ✨ MEJORA: Limpiar mensajes de error cuando el usuario empiece a escribir
+            $('input[name="UserName"], input[name="Password"]').on('input', function () {
+                // Ocultar mensajes de error después de 2 segundos de inactividad
+                clearTimeout(window.errorTimeout);
+                window.errorTimeout = setTimeout(function () {
+                    $('.error-message-container').fadeOut('slow');
+                }, 2000);
+                
+                // Limpiar errores de validación específicos del campo
+                $(this).next('.field-validation-error').hide();
+                $(this).removeClass('is-invalid');
+            });
+
+            // ✨ MEJORA: Efecto de loading en el botón
+            $('#loginForm').submit(function () {
+                var btn = $('#loginBtn');
+                var originalText = btn.html();
+                
+                // Mostrar loading
+                btn.html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Iniciando sesión...');
+                btn.prop('disabled', true);
+
+                // Si hay errores de validación, remover el loading
+                setTimeout(function () {
+                    if ($('.field-validation-error:visible').length > 0 || $('.validation-summary:visible').length > 0) {
+                        btn.html(originalText);
+                        btn.prop('disabled', false);
+                    }
+                }, 100);
+            });
+
+            // ✨ MEJORA: Efectos de focus en los inputs con validación visual
+            $('input[name="UserName"], input[name="Password"]').on('focus', function () {
+                $(this).addClass('focus-glow');
+            }).on('blur', function () {
+                $(this).removeClass('focus-glow');
+                
+                // Validar campo individual
+                if ($(this).val().trim() === '') {
+                    $(this).addClass('is-invalid');
+                } else {
+                    $(this).removeClass('is-invalid');
+                }
+            });
+
+            // ✨ MEJORA: Animación de entrada mejorada
+            setTimeout(function () {
+                $('.sign-user_card').css({
+                    'animation': 'slideInUp 0.6s ease-out',
+                    'opacity': '1'
+                });
+            }, 100);
+
+            // ✨ MEJORA: Auto-hide de mensajes de error después de 5 segundos
+            setTimeout(function () {
+                $('.error-message-container').fadeOut('slow');
+            }, 5000);
+        });
+    </script>
+}

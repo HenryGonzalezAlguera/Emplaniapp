@@ -1,0 +1,69 @@
+﻿@model Emplaniapp.Abstracciones.ModelosParaUI.TipoRemuneracionDto
+
+@{
+    ViewBag.Title = "Eliminar Remuneración";
+}
+
+<div class="row">
+    <div class="col-md-12" style="margin-bottom: 20px;">
+        <h2 class="mb-2">Agregar un Tipo de Remuneración</h2>
+        <!-- Botón de breadcrumb -->
+        <a class="btn btn-light text-primary" href="@Url.Action("Index","VariablesFinancieras")">
+            <i class="bi bi-arrow-left-short"></i>
+            Volver Variables Financieras
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card card-block card-stretch card-height shadow-lg">
+
+            <div class="card-header m-1">
+                <h4>¿Desea eliminar la siguiente información?</h4>
+            </div>
+
+            <div class="card-body m-1">
+                <div class="form-horizontal">
+
+                    <div class="form-group datos-row">
+                        <div class="datos-label">@Html.DisplayNameFor(model => model.nombreTipoRemuneracion)</div>
+                        <div class="datos-value">@Html.DisplayFor(model => model.nombreTipoRemuneracion)</div>
+                    </div>
+
+                    <div class="form-group datos-row">
+                        <div class="datos-label">@Html.DisplayNameFor(model => model.porcentajeRemuneracion)</div>
+                        <div class="datos-value">@Html.DisplayFor(model => model.porcentajeRemuneracion)</div>
+                    </div>
+
+                    <div class="form-group datos-row">
+                        <div class="datos-label">@Html.DisplayName("Estado")</div>
+                        <div class="datos-value">
+                            @if (Model.idEstado == 1)
+                            {
+                                <span class="badge bg-success-light">Activo</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger-light">Inactivo</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <br />
+
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-group text-center justify-content-center">
+                        <a class="btn btn-outline-secondary m-2" href="@Url.Action("Index","VariablesFinancieras")">
+                            Cancelar
+                        </a>
+                        <input type="submit" value="Eliminar" class="btn btn-primary" />
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

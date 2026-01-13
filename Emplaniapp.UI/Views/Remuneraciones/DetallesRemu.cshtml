@@ -1,0 +1,135 @@
+﻿@using Emplaniapp.Abstracciones.ModelosParaUI;
+@model Tuple<EmpleadoDto, List<RemuneracionDto>>
+
+@{
+    ViewBag.Title = $"{Model.Item1.nombre} {Model.Item1.primerApellido} {Model.Item1.segundoApellido}";
+    var seccionActiva = ViewBag.SeccionRemu ?? "Remuneraciones";
+}
+
+
+<!-- Título del empleado -->
+<div class="row">
+    <div class="col-md-12">
+        <a class="btn btn-light text-primary mb-2" href="@Url.Action( "listarHojaResumen", "HojaResumen")">
+            <i class="bi bi-arrow-left-short"></i>
+            Volver
+        </a>
+        <br />
+        <h2 class="titulo">@Model.Item1.nombre @Model.Item1.primerApellido @Model.Item1.segundoApellido</h2>
+        <br />
+    </div>
+</div>
+
+
+<!-- Enlaces de navegación -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="nav nav-tabs" role="tablist">
+            <a href="@Url.Action("DetallesRemu", "Remuneraciones", new { id = Model.Item1.idEmpleado })" class="@(seccionActiva == "Remuneraciones" ? "active" : "")  nav-item nav-link">Remuneraciones</a>
+            <a href="@Url.Action("Detalles", "Retenciones", new { id = Model.Item1.idEmpleado })" class="@(seccionActiva == "Retenciones" ? "active" : "")  nav-item nav-link">Retenciones</a>
+            <a href="@Url.Action("Detalles", "Liquidaciones", new { id = Model.Item1.idEmpleado })" class="@(seccionActiva == "Liquidacion" ? "active" : "")  nav-item nav-link">Liquidación</a>
+            <a href="@Url.Action("Detalles", "Observaciones", new { id = Model.Item1.idEmpleado, seccion = "Observaciones" })" class="@(seccionActiva == "Observaciones" ? "active" : "")  nav-item nav-link">Observaciones</a>
+        </div>
+        <br />
+    </div>
+</div>
+
+
+<!-- Contenido -->
+<div class="row">
+    <div class="col-md-12">
+        @if (seccionActiva == "Remuneraciones")
+        {
+
+
+            <div class="text-center mb-5">
+                <h2><strong>Remuneraciones</strong></h2>
+                <br />
+                <a href="@Url.Action("CrearRemuneracionManual", "Remuneraciones", new { idEmpleado = Model.Item1.idEmpleado })"
+                   class="btn btn-primary">
+                    <i class="bi bi-plus"></i> Agregar Remuneración
+                </a>
+            </div>
+
+            <!--- Tarjetas -->
+            <div class="row">
+                @if (Model.Item2.Any())
+                {
+                    foreach (var item in Model.Item2)
+                    {
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">@Html.DisplayFor(modelItem => item.nombreTipoRemuneracion)</h5>
+                                    <h6 class="card-subtitle text-muted">@Html.DisplayFor(modelItem => item.fechaRemuneracion)</h6>
+                                    <br />
+                                    @if (item.pagoQuincenal > 0)
+                                    {
+                                        <p class="card-text"><strong>Pago Quincenal:</strong> @String.Format("{0:C}", item.pagoQuincenal)</p>
+                                    }
+                                    @if (item.comision > 0)
+                                    {
+                                        <p class="card-text"><strong>Comisión:</strong> @String.Format("{0:C}", item.comision)</p>
+                                    }
+                                    @if (item.diasTrabajados > 0 || item.horas > 0)
+                                    {
+                                        <p>
+                                            <strong>Horas:</strong>
+                                            <ul class="list-unstyled ml-3">
+                                                @if (item.diasTrabajados > 0)
+                                                {
+                                                    <li>Trabajadas: @item.diasTrabajados</li>
+                                                }
+                                                @if (item.horas > 0)
+                                                {
+                                                    <li>Extras: @item.horas</li>
+                                                }
+                                            </ul>
+                                        </p>
+                                    }
+                                    <p><strong>Estado:</strong> <span class="badge @(item.nombreEstado == "Activo" ? "badge-success" : "badge-secondary")">@item.nombreEstado</span></p>
+
+                                </div>
+                                <div class="card-footer bg-transparent border-top-0 d-flex justify-content-end">
+                                    <a href="@Url.Action("EditarRemuneracion", "Remuneraciones", new { id = item.idRemuneracion, idEmpleado = item.idEmpleado })" class="btn btn-light text-primary">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </a>
+
+                                    @using (Html.BeginForm("EliminarRemuneracion", "Remuneraciones", FormMethod.Post, new { @class = "d-inline" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.idRemuneracion" />
+                                        <input type="hidden" name="idEmpleado" value="@item.idEmpleado" />
+                                        <button type="submit" class="btn btn-light" style="color: #de6f6f;"
+                                                onclick="return confirm('¿Está seguro de que desea eliminar esta remuneración?');">
+                                            <i class="bi bi-trash3-fill"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            No hay remuneraciones registradas para este empleado.
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/jqueryval")
+
+ 
+}

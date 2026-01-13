@@ -1,0 +1,610 @@
+@model Emplaniapp.Abstracciones.ModelosParaUI.EmpleadoDto
+
+
+
+<div class="text-center mb-2">
+    <h2><strong>Roles y Permisos</strong></h2>
+    <br />
+</div>
+
+<!-- Estado del sistema -->
+<div id="mensaje-estado" class="alert" style="display: none;"></div>
+<div id="loading" class="text-center" style="display: none;">
+    <i class="fa fa-spinner fa-spin"></i> Cargando...
+</div>
+
+
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card card-block card-stretch">
+
+            <div class="card-header">
+                <h4>Asignar Roles</h4>
+            </div>
+
+            <!-- Lista de roles con checkboxes -->
+            <div class="card-body">
+
+                <div id="roles-list" style="display: none;">
+                    <div class="role-checkbox-item">
+                        <label>
+                            <input type="checkbox" id="rol-Administrador" value="Administrador">
+                            <span class="role-label">Administrador</span>
+                        </label>
+
+                    </div>
+
+                    <div class="role-checkbox-item">
+                        <label class="role-label" for="rol-Contador">
+                            <input type="checkbox" id="rol-Contador" value="Contador">
+                            Contador
+                        </label>
+                    </div>
+
+                    <div class="role-checkbox-item">
+                        <label class="role-label" for="rol-Empleado">
+                            <input type="checkbox" id="rol-Empleado" value="Empleado">
+                            Empleado
+                        </label>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="botones-accion">
+                        <button type="button" id="btn-cancelar" class="btn btn-outline-secondary">
+                            Cancelar
+                        </button>
+                        <button type="button" id="btn-confirmar" class="btn btn-primary">
+                            <i class="fa fa-check"></i> Confirmar Cambios
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ✨ NUEVO: Modal de contraseña de administrador para cambios de roles -->
+@Html.Partial("_AdminPasswordModal")
+
+<!-- Estilos -->
+
+<style>
+    .role-checkbox-item {
+        padding: 12px 15px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        background-color: #fff;
+        transition: all 0.2s ease;
+    }
+
+        .role-checkbox-item:hover {
+            border-color: #007bff;
+            background-color: #E9E9FD;
+        }
+
+        .role-checkbox-item label {
+            display: flex;
+            align-items: center;
+            margin: 0;
+            cursor: pointer;
+            font-weight: normal;
+        }
+
+        .role-checkbox-item input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+            border-radius: 8px;
+            box-shadow: none;
+        }
+
+            .role-checkbox-item input[type="checkbox"]:checked {
+                color: #8f93f6;
+            }
+
+    .role-label {
+        font-size: 16px;
+        color: #333;
+    }
+</style>
+
+
+@*<style>
+        .roles-container-wrapper {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .roles-container {
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .empleado-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+            text-align: center;
+        }
+
+        .empleado-info p {
+            margin-bottom: 0;
+            font-size: 16px;
+        }
+
+        #roles-section h4 {
+            margin-bottom: 15px;
+            color: #333;
+            text-align: center;
+        }
+
+        .role-checkbox-item {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+            transition: all 0.2s ease;
+        }
+
+        .role-checkbox-item:hover {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+
+        .role-checkbox-item label {
+            display: flex;
+            align-items: center;
+            margin: 0;
+            cursor: pointer;
+            font-weight: normal;
+        }
+
+        .role-checkbox-item input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .role-label {
+            font-size: 16px;
+            color: #333;
+        }
+
+        #loading {
+            padding: 20px;
+            color: #666;
+        }
+
+        .botones-accion {
+            margin-top: 20px;
+            text-align: center;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-confirmar {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-confirmar:hover {
+            background-color: #218838;
+        }
+
+        .btn-confirmar:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .btn-cancelar {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-cancelar:hover {
+            background-color: #545b62;
+        }
+
+        .alert {
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert-warning {
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+            color: #856404;
+        }
+    </style>*@
+
+<!-- JavaScript -->
+<script>
+$(document).ready(function() {
+    var empleadoId = @Model.idEmpleado;
+    var rolesOriginales = {}; // Para rastrear el estado original
+    var cambiosPendientes = false;
+    
+    // ✨ CORRECCIÓN: Establecer el controlador correcto para el modal
+    window.currentController = 'DatosPersonales';
+
+    // Cargar roles al inicializar
+    cargarRoles();
+
+    function cargarRoles() {
+        $('#loading').show();
+        $('#roles-list').hide();
+        ocultarMensaje();
+
+        $.ajax({
+            url: '@Url.Action("ObtenerRolesEmpleado", "DatosPersonales")',
+            type: 'GET',
+            data: { idEmpleado: empleadoId },
+            success: function(response) {
+                $('#loading').hide();
+
+                if (response.success) {
+                    actualizarCheckboxes(response.roles);
+                    $('#roles-list').show();
+                } else {
+                    mostrarMensaje('warning', response.message);
+                    $('#roles-list').show();
+                }
+            },
+            error: function() {
+                $('#loading').hide();
+                mostrarMensaje('danger', 'Error al cargar la información de roles.');
+                $('#roles-list').show();
+            }
+        });
+    }
+
+    function actualizarCheckboxes(roles) {
+        // Limpiar estado anterior
+        rolesOriginales = {};
+        $('input[type="checkbox"]').prop('checked', false);
+
+        // Marcar los roles asignados y guardar estado original
+        roles.forEach(function(rol) {
+            rolesOriginales[rol.nombre] = rol.asignado;
+            $('#rol-' + rol.nombre).prop('checked', rol.asignado);
+        });
+
+        // Resetear estado de cambios
+        cambiosPendientes = false;
+        actualizarBotones();
+
+        // Agregar listeners a los checkboxes
+        $('input[type="checkbox"]').off('change').on('change', function() {
+            verificarCambios();
+        });
+    }
+
+    function verificarCambios() {
+        console.log('🔍 DIAGNÓSTICO: === VERIFICANDO CAMBIOS ===');
+        console.log('🔍 DIAGNÓSTICO: rolesOriginales:', rolesOriginales);
+        
+        cambiosPendientes = false;
+        var cambiosDetectados = [];
+
+        $('input[type="checkbox"]').each(function() {
+            var rol = $(this).val();
+            var estadoActual = $(this).is(':checked');
+            var estadoOriginal = rolesOriginales[rol] || false;
+
+            console.log(`🔍 DIAGNÓSTICO: Rol ${rol} - Estado actual: ${estadoActual}, Estado original: ${estadoOriginal}`);
+
+            if (estadoActual !== estadoOriginal) {
+                cambiosPendientes = true;
+                cambiosDetectados.push({
+                    rol: rol,
+                    actual: estadoActual,
+                    original: estadoOriginal
+                });
+                console.log(`🔍 DIAGNÓSTICO: ✅ CAMBIO DETECTADO - Rol: ${rol}, De: ${estadoOriginal} A: ${estadoActual}`);
+                return false; // break
+            }
+        });
+
+        console.log('🔍 DIAGNÓSTICO: cambiosPendientes:', cambiosPendientes);
+        console.log('🔍 DIAGNÓSTICO: cambiosDetectados:', cambiosDetectados);
+        actualizarBotones();
+    }
+
+    function actualizarBotones() {
+        if (cambiosPendientes) {
+            $('#btn-confirmar').prop('disabled', false);
+        } else {
+            $('#btn-confirmar').prop('disabled', true);
+        }
+    }
+
+    function mostrarMensaje(tipo, mensaje) {
+        var alertClass = 'alert-' + tipo;
+        var icono = 'fa-info-circle';
+
+        // Seleccionar icono según el tipo de mensaje
+        switch(tipo) {
+            case 'success':
+                icono = 'fa-check-circle';
+                break;
+            case 'danger':
+                icono = 'fa-exclamation-triangle';
+                break;
+            case 'warning':
+                icono = 'fa-exclamation-circle';
+                break;
+            default:
+                icono = 'fa-info-circle';
+        }
+
+        $('#mensaje-estado')
+            .removeClass('alert-success alert-danger alert-warning alert-info')
+            .addClass(alertClass)
+            .html('<i class="fa ' + icono + '"></i> ' + mensaje)
+            .show();
+
+        // Auto-ocultar después de 7 segundos para mensajes de éxito (más tiempo para leer)
+        var tiempo = tipo === 'success' ? 7000 : 5000;
+        setTimeout(function() {
+            $('#mensaje-estado').fadeOut();
+        }, tiempo);
+    }
+
+    function ocultarMensaje() {
+        $('#mensaje-estado').hide();
+    }
+
+    // Botón Confirmar Cambios
+    $('#btn-confirmar').click(function() {
+        console.log('🔍 DIAGNÓSTICO: === BOTÓN CONFIRMAR CAMBIOS PRESIONADO ===');
+        console.log('🔍 DIAGNÓSTICO: cambiosPendientes:', cambiosPendientes);
+        
+        if (!cambiosPendientes) {
+            console.log('🔍 DIAGNÓSTICO: ❌ No hay cambios pendientes, saliendo...');
+            return;
+        }
+
+        console.log('🔍 DIAGNÓSTICO: ✅ Hay cambios pendientes, procediendo...');
+        console.log('🔍 DIAGNÓSTICO: Llamando a aplicarCambios()...');
+        aplicarCambios();
+    });
+
+    // Botón Cancelar
+    $('#btn-cancelar').click(function() {
+        if (cambiosPendientes) {
+            if (!confirm('¿Está seguro que desea cancelar los cambios realizados?')) {
+                return;
+            }
+        }
+
+        // Revertir checkboxes al estado original
+        Object.keys(rolesOriginales).forEach(function(rol) {
+            $('#rol-' + rol).prop('checked', rolesOriginales[rol]);
+        });
+
+        cambiosPendientes = false;
+        actualizarBotones();
+        ocultarMensaje();
+    });
+
+    // ✨ CORRECCIÓN: Eliminar manejador duplicado - el modal ya tiene su propio manejador
+    // Este manejador estaba causando conflictos con el del modal
+
+    function aplicarCambios() {
+        console.log('🔍 DIAGNÓSTICO: aplicarCambios iniciado');
+        var cambios = [];
+
+        $('input[type="checkbox"]').each(function() {
+            var rol = $(this).val();
+            var estadoActual = $(this).is(':checked');
+            var estadoOriginal = rolesOriginales[rol] || false;
+
+            console.log(`🔍 DIAGNÓSTICO: Rol ${rol} - Estado actual: ${estadoActual}, Estado original: ${estadoOriginal}`);
+
+            if (estadoActual !== estadoOriginal) {
+                cambios.push({
+                    rol: rol,
+                    accion: estadoActual ? 'asignar' : 'remover'
+                });
+                console.log(`🔍 DIAGNÓSTICO: Cambio detectado - Rol: ${rol}, Acción: ${estadoActual ? 'asignar' : 'remover'}`);
+            }
+        });
+
+        console.log('🔍 DIAGNÓSTICO: Cambios detectados:', cambios);
+
+        if (cambios.length === 0) {
+            console.log('🔍 DIAGNÓSTICO: No hay cambios para aplicar');
+            mostrarMensaje('info', 'No hay cambios para aplicar.');
+            return;
+        }
+
+        // ✨ NUEVO: Verificar si es administrador y mostrar modal de contraseña
+        var isAdmin = @(User != null && User.IsInRole("Administrador") ? "true" : "false");
+        console.log('🔍 DIAGNÓSTICO: Usuario es admin:', isAdmin);
+        
+        if (isAdmin) {
+            console.log('🔍 DIAGNÓSTICO: Usuario es admin, mostrando modal para cambios de roles...');
+            console.log('🔍 DIAGNÓSTICO: Guardando cambios pendientes en window.pendingRoleChanges:', cambios);
+            console.log('🔍 DIAGNÓSTICO: === GUARDANDO CAMBIOS EN WINDOW.PENDINGROLECHANGES ===');
+            
+            // Guardar los cambios para procesarlos después de validar la contraseña
+            window.pendingRoleChanges = cambios;
+            
+            // ✨ VERIFICACIÓN EXTRA: Confirmar que se guardó correctamente
+            console.log('🔍 DIAGNÓSTICO: window.pendingRoleChanges después de guardar:', window.pendingRoleChanges);
+            console.log('🔍 DIAGNÓSTICO: window.pendingRoleChanges.length después de guardar:', window.pendingRoleChanges ? window.pendingRoleChanges.length : 'N/A');
+            console.log('🔍 DIAGNÓSTICO: typeof window.pendingRoleChanges:', typeof window.pendingRoleChanges);
+            console.log('🔍 DIAGNÓSTICO: Array.isArray(window.pendingRoleChanges):', Array.isArray(window.pendingRoleChanges));
+            
+            // Mostrar modal de contraseña de administrador
+            if (window.AdminPasswordModal && window.AdminPasswordModal.show) {
+                console.log('🔍 DIAGNÓSTICO: Usando window.AdminPasswordModal.show()');
+                console.log('🔍 DIAGNÓSTICO: === MOSTRANDO MODAL DE ADMIN ===');
+                window.AdminPasswordModal.show();
+            } else {
+                console.log('🔍 DIAGNÓSTICO: Usando método directo para mostrar modal');
+                $('#adminPasswordInput').val('');
+                $('#adminPasswordError').hide();
+                $('#adminPasswordModal').modal('show');
+            }
+        } else {
+            console.log('🔍 DIAGNÓSTICO: Usuario no es admin, procesando cambios directamente...');
+            procesarCambiosDirectamente(cambios);
+        }
+    }
+
+    function procesarCambiosDirectamente(cambios) {
+        console.log('🔍 DIAGNÓSTICO: procesarCambiosDirectamente llamado con cambios:', cambios);
+        console.log('🔍 DIAGNÓSTICO: Función procesarCambiosDirectamente ejecutándose...');
+        
+        // ✨ CORRECCIÓN: Limpiar cambios pendientes al inicio
+        console.log('🔍 DIAGNÓSTICO: Limpiando window.pendingRoleChanges al inicio...');
+        window.pendingRoleChanges = null;
+        
+        // Validar que hay cambios para procesar
+        if (!cambios || cambios.length === 0) {
+            console.error('❌ ERROR: No hay cambios para procesar');
+            console.log('🔍 DIAGNÓSTICO: cambios recibidos:', cambios);
+            return;
+        }
+        
+        // Mostrar mensaje de progreso
+        var mensajeProgreso = cambios.length === 1
+            ? 'Aplicando cambio de rol...'
+            : 'Aplicando ' + cambios.length + ' cambios de roles...';
+        console.log('🔍 DIAGNÓSTICO: Mostrando mensaje:', mensajeProgreso);
+        mostrarMensaje('info', mensajeProgreso);
+
+        // Deshabilitar controles durante el proceso
+        $('input[type="checkbox"], #btn-confirmar, #btn-cancelar').prop('disabled', true);
+        console.log('🔍 DIAGNÓSTICO: Controles deshabilitados, iniciando procesarCambios...');
+
+        procesarCambios(cambios, 0);
+    }
+
+    // ✨ NUEVO: Hacer la función disponible globalmente
+    window.procesarCambiosDirectamente = procesarCambiosDirectamente;
+
+    function procesarCambios(cambios, indice) {
+        console.log('🔍 DIAGNÓSTICO: procesarCambios llamado con indice:', indice, 'de', cambios.length);
+        
+        if (indice >= cambios.length) {
+            console.log('🔍 DIAGNÓSTICO: Todos los cambios completados');
+            // Todos los cambios completados
+            $('input[type="checkbox"], #btn-cancelar').prop('disabled', false);
+
+            // ✨ NUEVO: Mostrar modal de éxito en lugar de mensaje
+            var mensaje = cambios.length === 1
+                ? 'El cambio de rol ha sido aplicado exitosamente'
+                : 'Se aplicaron correctamente ' + cambios.length + ' cambios de roles';
+
+            console.log('🔍 DIAGNÓSTICO: Mostrando modal de éxito con mensaje:', mensaje);
+            
+            // Mostrar modal de éxito
+            if (typeof window.showSuccessModal === 'function') {
+                window.showSuccessModal(mensaje);
+            } else {
+                // Fallback si el modal no está disponible
+                mostrarMensaje('success', mensaje);
+            }
+            
+            cargarRoles(); // Recargar para actualizar estado
+            return;
+        }
+
+        var cambio = cambios[indice];
+        console.log('🔍 DIAGNÓSTICO: Procesando cambio #' + (indice + 1) + ':', cambio);
+        
+        var url = cambio.accion === 'asignar' ?
+            '@Url.Action("AsignarRol", "DatosPersonales")' :
+            '@Url.Action("RemoverRol", "DatosPersonales")';
+
+        console.log('🔍 DIAGNÓSTICO: URL de la petición:', url);
+        console.log('🔍 DIAGNÓSTICO: Datos a enviar:', {
+            idEmpleado: empleadoId,
+            nombreRol: cambio.rol
+        });
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: {
+                idEmpleado: empleadoId,
+                nombreRol: cambio.rol,
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function(response) {
+                console.log('🔍 DIAGNÓSTICO: Respuesta AJAX recibida para cambio #' + (indice + 1) + ':', response);
+                if (response.success) {
+                    console.log('✅ ÉXITO: Cambio #' + (indice + 1) + ' aplicado correctamente');
+                    
+                    // Verificar si se requiere refresh de la sesión del usuario afectado
+                    if (response.requiresRefresh) {
+                        console.log('🔄 Rol modificado - sesión del usuario afectado invalidada');
+                    }
+
+                    // Continuar con el siguiente cambio
+                    console.log('🔍 DIAGNÓSTICO: Continuando con el siguiente cambio...');
+                    procesarCambios(cambios, indice + 1);
+                } else {
+                    console.error('❌ ERROR: Fallo en cambio #' + (indice + 1) + ':', response.message);
+                    // Error en este cambio
+                    $('input[type="checkbox"], #btn-confirmar, #btn-cancelar').prop('disabled', false);
+                    
+                    // ✨ NUEVO: Mostrar modal de error
+                    var errorMessage = 'Error al ' + cambio.accion + ' el rol ' + cambio.rol + ': ' + response.message;
+                    if (typeof window.showErrorModal === 'function') {
+                        window.showErrorModal(errorMessage);
+                    } else {
+                        mostrarMensaje('danger', errorMessage);
+                    }
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('❌ ERROR: Error AJAX en cambio #' + (indice + 1) + ':', status, error);
+                console.error('❌ ERROR: Respuesta del servidor:', xhr.responseText);
+                $('input[type="checkbox"], #btn-confirmar, #btn-cancelar').prop('disabled', false);
+                
+                // ✨ NUEVO: Mostrar modal de error
+                var errorMessage = 'Error al ' + cambio.accion + ' el rol ' + cambio.rol + '.';
+                if (typeof window.showErrorModal === 'function') {
+                    window.showErrorModal(errorMessage);
+                } else {
+                    mostrarMensaje('danger', errorMessage);
+                }
+            }
+        });
+    }
+});
+</script> 

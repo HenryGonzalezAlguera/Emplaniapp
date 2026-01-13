@@ -1,0 +1,332 @@
+﻿@using Emplaniapp.Abstracciones.ModelosParaUI;
+@model Tuple<EmpleadoDto, LiquidacionDto>
+
+@{
+    ViewBag.Title = $"{Model.Item1.nombre} {Model.Item1.primerApellido} {Model.Item1.segundoApellido}";
+    var seccionActiva = ViewBag.Seccion ?? "Liquidaciones";
+}
+
+<!-- Mensaje de éxito -->
+@if (TempData["Mensaje"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Mensaje"]
+    </div>
+}
+
+
+<!-- Título del empleado -->
+<div class="row">
+    <div class="col-md-12">
+        <a class="btn btn-light text-primary mb-2" href="@Url.Action( "listarHojaResumen", "HojaResumen")">
+            <i class="bi bi-arrow-left-short"></i>
+            Volver
+        </a>
+        <br />
+        <h2 class="titulo">@Model.Item1.nombre @Model.Item1.primerApellido @Model.Item1.segundoApellido</h2>
+        <br />
+    </div>
+</div>
+
+
+<!-- Enlaces de navegación -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="nav nav-tabs" role="tablist">
+            <a href="@Url.Action("DetallesRemu", "Remuneraciones", new { id = Model.Item1.idEmpleado })" class="@(seccionActiva == "Remuneraciones" ? "active" : "")  nav-item nav-link">Remuneraciones</a>
+            <a href="@Url.Action("Detalles", "Retenciones", new { id = Model.Item1.idEmpleado })" class="@(seccionActiva == "Retenciones" ? "active" : "")  nav-item nav-link">Retenciones</a>
+            <a href="@Url.Action("Detalles", "Liquidaciones", new { id = Model.Item1.idEmpleado })" class="@(seccionActiva == "Liquidacion" ? "active" : "")  nav-item nav-link">Liquidación</a>
+            <a href="@Url.Action("Detalles", "Observaciones", new { id = Model.Item1.idEmpleado, seccion = "Observaciones" })" class="@(seccionActiva == "Observaciones" ? "active" : "")  nav-item nav-link">Observaciones</a>
+        </div>
+        <br />
+    </div>
+</div>
+
+
+
+<!-- Contenido -->
+<div class="row">
+    <div class="col-md-12">
+
+        @if (seccionActiva == "Liquidacion")
+        {
+
+            var item = Model.Item2;
+
+            using (Html.BeginForm("GuardarDatos", "Liquidaciones", FormMethod.Post, new { @id = "myform" }))
+            {
+                @Html.AntiForgeryToken()
+
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @Html.HiddenFor(model => item.idLiquidacion)
+                @Html.HiddenFor(model => item.idEmpleado, new { @id = "idEmp" })
+
+
+                <div class="text-center mb-5">
+                    <h2><strong>Liquidación</strong></h2>
+
+                    @if (item.idEstado == 0)
+                    {
+                        <br />
+                        <a href="@Url.Action("AgregarDatos", "Liquidaciones", new { id = Model.Item1.idEmpleado, seccion = "Liquidacion" })"
+                           class="btn btn-primary mb-3">
+                            <i class="bi bi-plus"></i>
+                            Agregar Liquidación
+                        </a>
+                    }
+                    else if (item.idEstado == 2)
+                    {
+                        <br />
+                        <span class="badge bg-warning-light font-size-16">
+                            <i class="fas fa-check"></i>
+                            Liquidación Pendiente
+                        </span>
+                    }
+                    else if (item.idEstado == 1)
+                    {
+                        <br />
+                        <span class="badge bg-success-light font-size-16">
+                            <i class="fas fa-check"></i>
+                            Empleado liquidado
+                        </span>
+                    }
+                </div>
+
+                if (item.idEstado != 0)
+                {
+                    <div class="form-horizontal">
+                        <div class="col-12">
+                            <div class="card card-block card-stretch card-height p-2">
+                                <div class="card-body">
+
+                                    @* DATOS ------------------------ *@
+                                    <div class="row">
+
+                                        @* Columna Izquierda *@
+                                        <div class="col-md-6">
+                                            <h4 class="mt-3">
+                                                <strong>
+                                                    <i class="bi bi-file-earmark-medical-fill"></i>
+                                                    Datos Generales
+                                                </strong>
+                                            </h4>
+                                            <br />
+                                            <div class="form-group datos-row">
+                                                <div class="col-md-4 datos-label">
+                                                    @Html.DisplayNameFor(model => item.fechaLiquidacion)
+                                                </div>
+                                                <div class="col-md-6 datos-value">
+                                                    @Html.DisplayFor(model => item.fechaLiquidacion, "{0:yyyy-MM-dd}", new { @id = "fechaLiq", @class = "form-control", @type = "date" })
+                                                    @Html.ValidationMessageFor(model => item.fechaLiquidacion, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group datos-row">
+                                                <div class="col-md-4 datos-label">
+                                                    @Html.DisplayNameFor(model => item.motivoLiquidacion)
+                                                </div>
+                                                <div class="col-md-6 datos-value">
+                                                    @Html.DisplayFor(model => item.motivoLiquidacion, new { @id = "motivo", @name = "selectorMotivo", @class = "form-control " })
+                                                    @Html.ValidationMessageFor(model => item.motivoLiquidacion, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group datos-row">
+                                                <div class="col-md-4 datos-label">
+                                                    @Html.DisplayNameFor(model => item.salarioPromedio)
+                                                </div>
+                                                <div class="col-md-6 datos-value">
+                                                    @Html.DisplayFor(model => item.salarioPromedio, new { @id = "salPromedio", htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group  datos-row">
+                                                <div class="col-md-4 datos-label">
+                                                    @Html.DisplayNameFor(model => item.aniosAntiguedad)
+                                                </div>
+                                                <div class="col-md-6 datos-value">
+                                                    @Html.DisplayFor(model => item.aniosAntiguedad, new { @id = "aniosAntq", htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group datos-row">
+                                                <div class="col-md-4 datos-label">
+                                                    @Html.DisplayNameFor(model => item.diasPreaviso)
+                                                </div>
+                                                <div class="col-md-6 datos-value">
+                                                    @Html.DisplayFor(model => item.diasPreaviso, new { @id = "diasPrev", htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group datos-row">
+                                                <div class="col-md-4 datos-label">
+                                                    @Html.DisplayNameFor(model => item.fechaPreaviso)
+                                                </div>
+                                                <div class="col-md-6 datos-value">
+                                                    @Html.DisplayFor(model => item.fechaPreaviso, "{0:yyyy-MM-dd}", new { @id = "fechaLiq", @class = "form-control", @type = "date" })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group datos-row">
+                                                <div class="col-md-4 datos-label">
+                                                    @Html.DisplayNameFor(model => item.diasVacacionesPendientes)
+                                                </div>
+                                                <div class="col-md-6 datos-value">
+                                                    @Html.DisplayFor(model => item.diasVacacionesPendientes, new { @id = "diasVac", htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group datos-row">
+                                                <div class="col-md-4 datos-label">
+                                                    @Html.DisplayNameFor(model => item.observacionLiquidacion)
+                                                </div>
+                                                <div class="col-md-6 datos-value">
+                                                    @Html.DisplayFor(model => item.observacionLiquidacion, new { @id = "observs", @class = "form-control " })
+                                                    @Html.ValidationMessageFor(model => item.observacionLiquidacion, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                            <br />
+                                        </div>
+
+                                        @* Columna Derecha *@
+                                        <div class="col-md-6">
+                                            <h4 class="mt-3">
+                                                <strong>
+                                                    <i class="bi bi-calculator-fill"></i>
+                                                    Cálculo de Liquidación
+                                                </strong>
+                                            </h4>
+                                            <br />
+                                            <div class="form-group datos-row">
+                                                <div class="col-md-5 datos-label">
+                                                    @Html.DisplayNameFor(model => item.pagoPreaviso)
+                                                </div>
+                                                <div class="col-md-5 datos-value">
+                                                    @Html.DisplayFor(model => item.pagoPreaviso, new { @id = "pagoPrev", htmlAttributes = new { @class = "form-control", @disabled = "disabled" } })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group datos-row">
+                                                <div class="col-md-5 datos-label">
+                                                    @Html.DisplayNameFor(model => item.pagoAguinaldoProp)
+                                                </div>
+                                                <div class="col-md-5 datos-value">
+                                                    @Html.DisplayFor(model => item.pagoAguinaldoProp, new { @id = "pagoAgui", htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group datos-row">
+                                                <div class="col-md-5 datos-label">
+                                                    @Html.DisplayNameFor(model => item.pagoCesantia)
+                                                </div>
+                                                <div class="col-md-5 datos-value">
+                                                    @Html.DisplayFor(model => item.pagoCesantia, new { @id = "pagoCes", htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group datos-row">
+                                                <div class="col-md-5 datos-label">
+                                                    @Html.DisplayNameFor(model => item.pagoVacacionesNG)
+                                                </div>
+                                                <div class="col-md-5 datos-value">
+                                                    @Html.DisplayFor(model => item.pagoVacacionesNG, new { @id = "pagoRemPen", htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group datos-row">
+                                                <div class="col-md-5 datos-label">
+                                                    @Html.DisplayNameFor(model => item.remuPendientes)
+                                                </div>
+                                                <div class="col-md-5 datos-value">
+                                                    @Html.DisplayFor(model => item.remuPendientes, new { @id = "pagoRemPen", htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group datos-row">
+                                                <div class="col-md-5 datos-label">
+                                                    @Html.DisplayNameFor(model => item.costoLiquidacion)
+                                                </div>
+                                                <div class="col-md-5 datos-value">
+                                                    @Html.DisplayFor(model => item.costoLiquidacion, new { @id = "CostoLiq", htmlAttributes = new { @class = "form-control" } })
+                                                </div>
+                                            </div>
+                                            <br />
+                                        </div>
+
+                                    </div>
+
+                                    @* Botones finales  *@
+
+                                    @if (item.idEstado == 2)
+                                    {
+                                        <br />
+                                        <div class="row form-group text-center justify-content-center">
+
+                                            <a href="@Url.Action("EditDatos", "Liquidaciones", new { id = Model.Item1.idEmpleado, seccion = "Liquidacion" })"
+                                               class="btn btn-outline-primary m-1">
+                                                <i class="bi bi-pencil-fill"></i> Editar Datos
+                                            </a>
+
+
+
+                                            <a href="@Url.Action("GuardarDatos", "Liquidaciones", new { id = Model.Item1.idEmpleado, seccion = "Liquidacion" })"
+                                               id="submitButton" name="submitButton" class="btn btn-outline-success m-1">
+                                                <i class="bi bi-check-circle-fill"></i>
+                                                Procesar Liquidación
+                                            </a>
+
+                                        </div>
+
+                                    }
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        }
+
+    </div>
+</div>
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+<script>
+    $(document).ready(function () {
+
+
+        // Escuchar donde el checkbox se activa
+        const button = document.getElementById('submitButton');
+
+
+        function redirectToNextPage() {
+            window.location.href = @Url.Action("GuardarDatos", "Liquidaciones", new { id = Model.Item1.idEmpleado, seccion = "Liquidacion" });
+        }
+
+
+        var dropdown = document.getElementById('fechaLiq')
+        dropdown.addEventListener('change', function () {
+            var seleccionado = this.value;
+            document.getElementById("fechaLiq").value = selectedValue;
+            document.getElementById("Fechaliquida").value = selectedValue;
+        });
+
+
+        var dropdown = document.getElementById('motivo')
+        dropdown.addEventListener('change', function () {
+            var seleccionado = this.value;
+            document.getElementById("motivo").value = selectedValue;
+        })
+
+
+
+    });
+
+</script>
+
+
