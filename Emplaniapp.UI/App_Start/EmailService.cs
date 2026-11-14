@@ -1,14 +1,25 @@
-﻿using System.Configuration;
+using System;
+using System.Configuration;
+using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 
 public class EmailService : IIdentityMessageService
 {
+    // Las credenciales SMTP son variables de entorno, nunca valores versionados.
     public async Task SendAsync(IdentityMessage message)
     {
-        var fromEmail = ConfigurationManager.AppSettings["MailFromEmail"];
-        var fromName = ConfigurationManager.AppSettings["MailFromName"];
+        var smtpUser = Environment.GetEnvironmentVariable("EMPLANIAPP_SMTP_USERNAME");
+        var smtpPassword = Environment.GetEnvironmentVariable("EMPLANIAPP_SMTP_PASSWORD");
+        var fromEmail = Environment.GetEnvironmentVariable("EMPLANIAPP_MAIL_FROM");
+        var fromName = ConfigurationManager.AppSettings["MailFromName"] ?? "Emplaniapp";
+
+        if (string.IsNullOrWhiteSpace(smtpUser) || string.IsNullOrWhiteSpace(smtpPassword))
+            throw new InvalidOperationException("SMTP no configurado. Defina las variables de entorno de correo.");
+
+        if (string.IsNullOrWhiteSpace(fromEmail))
+            fromEmail = smtpUser;
 
         using (var mail = new MailMessage())
         {
@@ -18,9 +29,11 @@ public class EmailService : IIdentityMessageService
             mail.Body = message.Body;
             mail.IsBodyHtml = true;
 
-            using (var smtp = new SmtpClient()) // lee system.net/mailSettings
+            // SmtpClient usa host, puerto y TLS de system.net/mailSettings.
+            using (var smtp = new SmtpClient())
             {
-                // SmtpClient toma host/puerto/credenciales/SSL del Web.config
+                smtp.UseDefaultCredentials = false;
+                smtp.Credentials = new NetworkCredential(smtpUser, smtpPassword);
                 await smtp.SendMailAsync(mail);
             }
         }
