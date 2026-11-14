@@ -20,3 +20,14 @@
 
 # NuGet packages folder (proyectos packages.config)
 packages/
+
+# Secretos y configuraciones locales
+.env
+.env.*
+!.env.example
+**/*.publishsettings
+**/*.pfx
+**/*.p12
+**/secrets.json
+**/Web.Local.config
+**/Web.Secrets.config
